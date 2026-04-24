@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export type CreateSpaceState = {
@@ -34,6 +35,8 @@ export async function createSpaceAction(_previousState: CreateSpaceState, formDa
             userId: Number(session.user.id)
         }
     });
+
+    revalidatePath("/spaces", "layout");
 
     redirect(`/spaces/${space.id}`);
 }
