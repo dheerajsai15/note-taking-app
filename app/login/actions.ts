@@ -7,7 +7,7 @@ type signInState = {
     error: string | null
 }
 
-export async function signInAction(_previousState, formData: FormData): Promise<signInState>{
+export async function signInAction(_previousState: signInState, formData: FormData): Promise<signInState>{
     const email = formData.get("email");
     const password = formData.get("password");
 

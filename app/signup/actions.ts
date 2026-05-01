@@ -8,7 +8,7 @@ type SignUpState = {
 }
 
 
-export async function signUpAction(_previousState, formData: FormData): Promise<SignUpState>{
+export async function signUpAction(_previousState: SignUpState, formData: FormData): Promise<SignUpState>{
     const email = formData.get("email");
     const password = formData.get("password")
     const confirmPassword = formData.get("confirmPassword")
