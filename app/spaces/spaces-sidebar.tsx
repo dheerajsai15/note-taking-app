@@ -81,7 +81,7 @@ export default function SpacesSidebar({ spaces, userEmail } : {
                     disabled={isPending}
                     maxLength={60}
                     onKeyDown={e => {
-                        if(e.key == "Escape"){
+                        if(e.key == "Escape" && !isPending){
                             e.preventDefault();
                             setIsCreating(false);
                         }

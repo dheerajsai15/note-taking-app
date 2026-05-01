@@ -1,11 +1,27 @@
-import { Note, Space } from "@/app/generated/prisma/client"
+"use client"
+
+import { Note } from "@/app/generated/prisma/client"
 import Link from "next/link"
+import { useActionState, useEffect, useRef, useState } from "react"
+import { createNoteAction } from "./action"
+import { usePathname } from "next/navigation"
 
 export default function NotesSidebar({ spaceId, spaceName, notes }: {
     spaceId: number,
     spaceName: string,
     notes: Note[]
 }){
+    const [isCreating, setIsCreating] = useState(false);
+    const initialState = { error: null }
+    const [ state, formAction, isPending ] = useActionState(createNoteAction, initialState); 
+    const inputRef = useRef<HTMLInputElement>(null);
+    const pathname = usePathname();
+
+    useEffect(() => {
+        if(isCreating)
+            inputRef.current?.focus();
+    }, [isCreating]);
+
     return <div>
         <div className="border-b border-white/8 px-5 py-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/35">
@@ -25,6 +41,8 @@ export default function NotesSidebar({ spaceId, spaceName, notes }: {
                     type="button"
                     className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/60 transition-all duration-200 hover:border-orange-400/30 hover:bg-white/8 hover:text-orange-300"
                     aria-label="Create note"
+                    onClick={() => setIsCreating(true)}
+                    disabled={isPending || isCreating}
                 >
                     <svg
                         className="h-4 w-4"
@@ -44,6 +62,44 @@ export default function NotesSidebar({ spaceId, spaceName, notes }: {
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-3">
+            {isCreating && (
+                <form className="mb-3" action={formAction}>
+                    <div className="rounded-2xl border border-orange-400/20 bg-white/[0.04] p-2 ring-1 ring-orange-500/10">
+                        <div className="flex items-center gap-3 rounded-xl px-2 py-1">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-orange-500/15 text-xs font-semibold text-orange-300">
+                                +
+                            </span>
+                            <input type="hidden" name="spaceId" value={spaceId} />
+                            <input
+                                name="name"
+                                type="text"
+                                placeholder="Untitled note"
+                                maxLength={60}
+                                disabled={isPending}
+                                ref={inputRef}
+                                className="w-full bg-transparent text-sm font-medium text-white outline-none placeholder:text-white/25"
+                                onKeyDown={e => {
+                                    if(e.key == "Escape" && !isPending){
+                                        e.preventDefault()
+                                        setIsCreating(false)
+                                    }
+                                }}
+                                onBlur={() => {
+                                    if(!isPending)
+                                        setIsCreating(false)
+                                }}
+                            />
+
+                        </div>
+                        {state.error && (
+                            <p className="px-2 pt-2 text-xs text-red-300/90">
+                                {state.error}
+                            </p>
+                        )}
+                    </div>
+                </form>
+            )}
+
             {notes.length === 0 ? (
                 <div className="mt-10 flex flex-col items-center px-4 text-center">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 ring-1 ring-white/8">
@@ -70,26 +126,40 @@ export default function NotesSidebar({ spaceId, spaceName, notes }: {
                 </div>
             ) : (
                 <ul className="space-y-1.5">
-                    {notes.map((note) => (
-                        <li key={note.id}>
-                            <Link
-                                href={`/spaces/${spaceId}/notes/${note.id}`}
-                                className="group flex rounded-2xl border border-transparent bg-white/2 px-4 py-3 transition-all duration-150 hover:border-white/10 hover:bg-white/5"
-                            >
-                                <div className="min-w-0">
-                                    <p className="truncate text-sm font-medium text-white/75 transition-colors group-hover:text-white">
-                                        {note.title}
-                                    </p>
-                                    <p className="mt-1 text-xs text-white/28">
-                                        Updated {new Intl.DateTimeFormat("en", {
-                                            month: "short",
-                                            day: "numeric",
-                                        }).format(note.updatedAt)}
-                                    </p>
-                                </div>
-                            </Link>
-                        </li>
-                    ))}
+                    {notes.map((note) => {
+                        const href = `/spaces/${spaceId}/notes/${note.id}`
+                        const isActive = pathname == href;
+
+                        return (
+                            <li key={note.id}>
+                                <Link
+                                    href={href}
+                                    className={`group flex rounded-2xl border px-4 py-3 transition-all duration-150 ${
+                                        isActive
+                                            ? "border-white/10 bg-white/[0.07] ring-1 ring-white/8"
+                                            : "border-transparent bg-white/2 hover:border-white/10 hover:bg-white/5"
+                                    }`}
+                                >
+                                    <div className="min-w-0">
+                                        <p className={`truncate text-sm font-medium transition-colors ${
+                                            isActive
+                                                ? "text-white"
+                                                : "text-white/75 group-hover:text-white"
+                                        }`}>
+                                            {note.title}
+                                        </p>
+                                        <p className={`mt-1 text-xs ${
+                                            isActive ? "text-white/40" : "text-white/28"
+                                        }`}>
+                                            Updated {new Intl.DateTimeFormat("en", {
+                                                month: "short",
+                                                day: "numeric",
+                                            }).format(note.updatedAt)}
+                                        </p>
+                                    </div>
+                                </Link>
+                            </li>
+                    )})}
                 </ul>
             )}
         </nav>

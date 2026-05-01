@@ -55,7 +55,7 @@ export async function createNoteAction(_previousState: CreateNoteState, formData
         }
     })
 
-    revalidatePath("/spaces", "layout")
+    revalidatePath(`/spaces/${spaceId}`, "layout")
 
     redirect(`/spaces/${spaceId}/notes/${note.id}`)
 }
