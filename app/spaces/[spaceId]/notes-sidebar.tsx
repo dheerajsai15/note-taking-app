@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useActionState, useEffect, useRef, useState } from "react"
 import { createNoteAction } from "./action"
 import { usePathname } from "next/navigation"
+import DeleteSpaceModal from "./delete-space-modal"
 
 export default function NotesSidebar({ spaceId, spaceName, notes }: {
     spaceId: number,
@@ -16,6 +17,7 @@ export default function NotesSidebar({ spaceId, spaceName, notes }: {
     const [ state, formAction, isPending ] = useActionState(createNoteAction, initialState); 
     const inputRef = useRef<HTMLInputElement>(null);
     const pathname = usePathname();
+    const [ isDeleteModalOpen, setIsDeleteModalOpen ] = useState(false)
 
     useEffect(() => {
         if(isCreating)
@@ -37,27 +39,52 @@ export default function NotesSidebar({ spaceId, spaceName, notes }: {
                     </p>
                 </div>
 
-                <button
-                    type="button"
-                    className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/60 transition-all duration-200 hover:border-orange-400/30 hover:bg-white/8 hover:text-orange-300"
-                    aria-label="Create note"
-                    onClick={() => setIsCreating(true)}
-                    disabled={isPending || isCreating}
-                >
-                    <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2}
-                        stroke="currentColor"
+                <div className="flex shrink-0 items-center gap-2">
+                    <button
+                        type="button"
+                        className="group inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-red-400/20 bg-red-500/10 text-red-200 transition-all duration-200 hover:border-white/20 hover:bg-black hover:text-white active:scale-[0.98]"
+                        aria-label="Delete space"
+                        title="Delete space"
+                        onClick={() => setIsDeleteModalOpen(true)}
                     >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 4.5v15m7.5-7.5h-15"
-                        />
-                    </svg>
-                </button>
+                        <svg
+                            className="h-4 w-4 transition-colors duration-200 group-hover:text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                            aria-hidden="true"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M6 7.5h12m-9.75 0V6a1.5 1.5 0 011.5-1.5h4.5a1.5 1.5 0 011.5 1.5v1.5m-9 0v10.125A2.625 2.625 0 009.375 20.25h5.25A2.625 2.625 0 0017.25 17.625V7.5M10.5 10.5v6m3-6v6"
+                            />
+                        </svg>
+                    </button>
+
+                    <button
+                        type="button"
+                        className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/60 transition-all duration-200 hover:border-orange-400/30 hover:bg-white/8 hover:text-orange-300"
+                        aria-label="Create note"
+                        onClick={() => setIsCreating(true)}
+                        disabled={isPending || isCreating}
+                    >
+                        <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M12 4.5v15m7.5-7.5h-15"
+                            />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -163,5 +190,13 @@ export default function NotesSidebar({ spaceId, spaceName, notes }: {
                 </ul>
             )}
         </nav>
+
+        {isDeleteModalOpen &&
+            <DeleteSpaceModal 
+                spaceId={spaceId}
+                spaceName={spaceName}
+                onClose={() => setIsDeleteModalOpen(false)}
+            />
+        }
     </div>
 }

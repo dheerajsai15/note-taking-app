@@ -44,3 +44,38 @@ export async function createSpaceAction(_previousState: CreateSpaceState, formDa
 export async function signOutAction(){
     await signOut({ redirectTo: "/login"});
 }
+
+export async function deleteSpaceAction(formData: FormData){
+    const session = await auth();
+    if(!session?.user?.id)
+        redirect("/login")
+
+    const rawSpaceId = formData.get("spaceId");
+    if(typeof rawSpaceId !== "string")
+        return;
+
+    const spaceId = Number(rawSpaceId);
+    const userId = Number(session.user.id)
+    if(Number.isNaN(spaceId))
+        return;
+
+    const space = await prisma.space.findFirst({
+        where:{
+            id: spaceId,
+            userId
+        }
+    })
+
+    if(!space)
+        redirect("/spaces")
+
+    await prisma.space.delete({
+        where: {
+            id: spaceId
+        }
+    })
+
+    revalidatePath(`/spaces`, "layout");
+
+    redirect("/spaces")
+}

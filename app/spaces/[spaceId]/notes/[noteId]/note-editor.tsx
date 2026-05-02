@@ -2,7 +2,7 @@
 
 import { useActionState, useRef, useState } from "react"
 import { updateNoteAction } from "./actions"
-import DeleteModal from "./delete-modal"
+import DeleteNoteModal from "./delete-note-modal"
 import { Note } from "@/app/generated/prisma/client"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSave, faSpinner } from "@fortawesome/free-solid-svg-icons";
@@ -105,7 +105,7 @@ export default function NoteEditor({
             </form>
 
             {isDeleteModalOpen && (
-                <DeleteModal
+                <DeleteNoteModal
                     noteTitle={note.title}
                     noteId={noteId}
                     spaceId={spaceId}

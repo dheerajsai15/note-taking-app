@@ -9,7 +9,7 @@ type DeleteModalProps = {
   spaceId: number
 };
 
-export default function DeleteModal({ noteTitle, onClose, noteId, spaceId }: DeleteModalProps) {
+export default function DeleteNoteModal({ noteTitle, onClose, noteId, spaceId }: DeleteModalProps) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 px-4 backdrop-blur-sm"
