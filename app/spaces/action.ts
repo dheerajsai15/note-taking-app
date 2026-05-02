@@ -1,6 +1,6 @@
 "use server"
 
-import { auth } from "@/auth"
+import { auth, signOut } from "@/auth"
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -39,4 +39,8 @@ export async function createSpaceAction(_previousState: CreateSpaceState, formDa
     revalidatePath("/spaces", "layout");
 
     redirect(`/spaces/${space.id}`);
+}
+
+export async function signOutAction(){
+    await signOut({ redirectTo: "/login"});
 }

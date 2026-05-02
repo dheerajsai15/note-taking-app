@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Space } from "../generated/prisma/client"
 import { useActionState, useEffect, useRef, useState } from "react"
-import { createSpaceAction } from "./action"
+import { createSpaceAction, signOutAction } from "./action"
 import { usePathname } from "next/navigation"
 
 export default function SpacesSidebar({ spaces, userEmail } : {
@@ -166,9 +166,33 @@ export default function SpacesSidebar({ spaces, userEmail } : {
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/8 text-xs font-semibold text-white/60">
               {userEmail.charAt(0) ?? "U"}
             </div>
-            <p className="min-w-0 truncate text-xs text-white/45">
+            <p className="min-w-0 flex-1 truncate text-xs text-white/45">
               {userEmail}
             </p>
+
+            <form action={signOutAction}>
+              <button
+                type="submit"
+                aria-label="Sign out"
+                title="Sign out"
+                className="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white/45 transition-all duration-200 hover:border-orange-400/25 hover:bg-white/8 hover:text-orange-200"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-7.5a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 006 21h7.5a2.25 2.25 0 002.25-2.25V15M18 12H9m0 0l3-3m-3 3l3 3"
+                  />
+                </svg>
+              </button>
+            </form>
           </div>
         </div>
       </aside>

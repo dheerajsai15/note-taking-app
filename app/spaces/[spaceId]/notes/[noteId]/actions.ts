@@ -71,3 +71,46 @@ export async function updateNoteAction(_previousState: UpdateNoteState, formData
 
     redirect(`/spaces/${parsedSpaceId}/notes/${parsedNoteId}`)
 }
+
+export async function deleteNoteAction(formData: FormData){
+    const session = await auth();
+    if(!session?.user?.id)
+        redirect("/login")
+
+    const rawSpaceId = formData.get("spaceId")
+    const rawNoteId = formData.get("noteId")
+
+    if(typeof rawSpaceId !== "string" || typeof rawNoteId !== "string")
+        return;
+
+    const spaceId = Number(rawSpaceId);
+    const noteId = Number(rawNoteId);
+    const userId = Number(session.user.id)
+
+    if(Number.isNaN(spaceId) || Number.isNaN(noteId)){
+        redirect("/spaces")
+    }
+
+    const note = await prisma.note.findFirst({
+        where:{
+            id: noteId,
+            spaceId,
+            space: {
+                userId
+            }
+        }
+    });
+
+    if(!note)
+        redirect("/spaces")
+
+    await prisma.note.delete({
+        where: {
+            id: noteId
+        }
+    })
+
+    revalidatePath(`/spaces/${spaceId}`, "layout")
+
+    redirect(`/spaces/${spaceId}`);
+}
