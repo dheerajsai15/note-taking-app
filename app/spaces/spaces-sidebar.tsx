@@ -24,7 +24,7 @@ export default function SpacesSidebar({ spaces, userEmail } : {
     return <aside className="flex w-72 shrink-0 flex-col border-r border-white/8 bg-[#0a0a0a]">
         {/* Brand */}
         <div className="flex items-center gap-3 border-b border-white/8 px-5 py-5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-sm font-bold text-black"
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-sm font-bold text-black cursor-pointer"
           onClick={() => {redirect("/spaces")}}>
             D
           </div>
