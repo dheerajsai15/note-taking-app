@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Space } from "../generated/prisma/client"
 import { useActionState, useEffect, useRef, useState } from "react"
 import { createSpaceAction, signOutAction } from "./action"
-import { usePathname } from "next/navigation"
+import { redirect, usePathname } from "next/navigation"
 
 export default function SpacesSidebar({ spaces, userEmail } : {
     spaces: Space[],
@@ -24,7 +24,8 @@ export default function SpacesSidebar({ spaces, userEmail } : {
     return <aside className="flex w-72 shrink-0 flex-col border-r border-white/8 bg-[#0a0a0a]">
         {/* Brand */}
         <div className="flex items-center gap-3 border-b border-white/8 px-5 py-5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-sm font-bold text-black">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-sm font-bold text-black"
+          onClick={() => {redirect("/spaces")}}>
             D
           </div>
           <span className="text-base font-semibold tracking-tight text-white">
