@@ -9,9 +9,20 @@ export default function LoginPage(){
     const [ state, formAction, isPending ] = useActionState(signInAction, initialState);
 
     return (
-    <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-black px-4 py-10 text-white sm:px-6 lg:px-8">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(249,115,22,0.18),_transparent_30%),linear-gradient(180deg,_#000000_0%,_#0a0a0a_100%)]" />
-        <div className="absolute top-20 h-40 w-40 rounded-full bg-orange-500/10 blur-3xl" />
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-black text-white">
+        {/* ── Navbar ── */}
+        <nav className="relative z-20 flex items-center justify-between bg-black px-6 py-5 sm:px-10 lg:px-16">
+            <Link href="/" className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 text-sm font-bold text-black">
+                    D
+                </div>
+                <span className="text-lg font-semibold tracking-tight">Notes</span>
+            </Link>
+        </nav>
+
+        <main className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-10 text-white sm:px-6 lg:px-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(249,115,22,0.18),_transparent_30%),linear-gradient(180deg,_#000000_0%,_#0a0a0a_100%)]" />
+        <div className="absolute bottom-20 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-orange-500/10 blur-3xl" />
 
         <section
         className="relative w-full max-w-md rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl sm:p-8"
@@ -109,5 +120,6 @@ export default function LoginPage(){
         }
         `}</style>
     </main>
+    </div>
     );
 }
