@@ -3,7 +3,7 @@
 import { Note } from "@/app/generated/prisma/client"
 import Link from "next/link"
 import { useActionState, useEffect, useRef, useState } from "react"
-import { createNoteAction } from "./action"
+import { createNoteAction, renameSpaceAction } from "./action"
 import { usePathname } from "next/navigation"
 import DeleteSpaceModal from "./delete-space-modal"
 
@@ -18,11 +18,27 @@ export default function NotesSidebar({ spaceId, spaceName, notes }: {
     const inputRef = useRef<HTMLInputElement>(null);
     const pathname = usePathname();
     const [ isDeleteModalOpen, setIsDeleteModalOpen ] = useState(false)
+    const [ isRenaming, setIsRenaming ] = useState(false);
+    const renameInitialState = { error: null }
+    const [ renameState, renameFormAction, isRenamePending ] = useActionState(renameSpaceAction, renameInitialState);
+    const renameInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if(isCreating)
             inputRef.current?.focus();
     }, [isCreating]);
+
+    useEffect(() => {
+        if(isRenaming) {
+            renameInputRef.current?.focus();
+            renameInputRef.current?.select();
+        }
+    }, [isRenaming]);
+
+    useEffect(() => {
+        if(isRenaming)
+            setIsRenaming(false);
+    }, [spaceName]);
 
     return <div>
         <div className="border-b border-white/8 px-5 py-4">
@@ -31,34 +47,64 @@ export default function NotesSidebar({ spaceId, spaceName, notes }: {
             </p>
             <div className="mt-3 flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                    <h1 className="truncate text-lg font-semibold tracking-tight text-white/90">
-                        {spaceName}
-                    </h1>
-                    <p className="mt-1 text-xs text-white/35">
-                        {notes.length} {notes.length === 1 ? "note" : "notes"}
-                    </p>
+                    {isRenaming ? (
+                        <form action={renameFormAction} className="w-full">
+                            <input type="hidden" name="spaceId" value={spaceId} />
+                            <input
+                                name="spaceName"
+                                type="text"
+                                defaultValue={spaceName}
+                                maxLength={60}
+                                disabled={isRenamePending}
+                                ref={renameInputRef}
+                                className="w-full bg-transparent text-lg font-semibold tracking-tight text-white/90 outline-none placeholder:text-white/25 disabled:opacity-60"
+                                onKeyDown={e => {
+                                    if(e.key === "Escape" && !isRenamePending){
+                                        e.preventDefault();
+                                        setIsRenaming(false);
+                                    }
+                                }}
+                                onBlur={() => {
+                                    if(!isRenamePending)
+                                        setIsRenaming(false);
+                                }}
+                            />
+                            {renameState.error && (
+                                <p className="mt-1 text-xs text-red-300/90">{renameState.error}</p>
+                            )}
+                        </form>
+                    ) : (
+                        <>
+                            <h1 className="truncate text-lg font-semibold tracking-tight text-white/90">
+                                {spaceName}
+                            </h1>
+                            <p className="mt-1 text-xs text-white/35">
+                                {notes.length} {notes.length === 1 ? "note" : "notes"}
+                            </p>
+                        </>
+                    )}
                 </div>
 
                 <div className="flex shrink-0 items-center gap-2">
                     <button
                         type="button"
-                        className="group inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-red-400/20 bg-red-500/10 text-red-200 transition-all duration-200 hover:border-white/20 hover:bg-black hover:text-white active:scale-[0.98]"
-                        aria-label="Delete space"
-                        title="Delete space"
-                        onClick={() => setIsDeleteModalOpen(true)}
+                        className="group inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/60 transition-all duration-200 hover:border-orange-400/30 hover:bg-white/8 hover:text-orange-300 active:scale-[0.98]"
+                        aria-label="Rename space"
+                        title="Rename space"
+                        onClick={() => setIsRenaming(true)}
+                        disabled={isRenaming}
                     >
                         <svg
-                            className="h-4 w-4 transition-colors duration-200 group-hover:text-white"
+                            className="h-4 w-4"
                             fill="none"
                             viewBox="0 0 24 24"
                             strokeWidth={2}
                             stroke="currentColor"
-                            aria-hidden="true"
                         >
                             <path
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
-                                d="M6 7.5h12m-9.75 0V6a1.5 1.5 0 011.5-1.5h4.5a1.5 1.5 0 011.5 1.5v1.5m-9 0v10.125A2.625 2.625 0 009.375 20.25h5.25A2.625 2.625 0 0017.25 17.625V7.5M10.5 10.5v6m3-6v6"
+                                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
                             />
                         </svg>
                     </button>
@@ -81,6 +127,29 @@ export default function NotesSidebar({ spaceId, spaceName, notes }: {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 d="M12 4.5v15m7.5-7.5h-15"
+                            />
+                        </svg>
+                    </button>
+
+                    <button
+                        type="button"
+                        className="group inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-red-400/20 bg-red-500/10 text-red-200 transition-all duration-200 hover:border-white/20 hover:bg-black hover:text-white active:scale-[0.98]"
+                        aria-label="Delete space"
+                        title="Delete space"
+                        onClick={() => setIsDeleteModalOpen(true)}
+                    >
+                        <svg
+                            className="h-4 w-4 transition-colors duration-200 group-hover:text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                            aria-hidden="true"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M6 7.5h12m-9.75 0V6a1.5 1.5 0 011.5-1.5h4.5a1.5 1.5 0 011.5 1.5v1.5m-9 0v10.125A2.625 2.625 0 009.375 20.25h5.25A2.625 2.625 0 0017.25 17.625V7.5M10.5 10.5v6m3-6v6"
                             />
                         </svg>
                     </button>
